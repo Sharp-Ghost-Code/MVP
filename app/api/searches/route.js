@@ -4,7 +4,7 @@ export async function POST(request) {
   try {
     const body = await request.json()
     const supabase = createClient()
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('searches')
       .insert({
         max_budget: body.budget ? parseInt(body.budget) : null,
@@ -22,11 +22,10 @@ export async function POST(request) {
         interest_rate: body.interest_rate ? parseFloat(body.interest_rate) : null,
         loan_term_months: body.loan_term ? parseInt(body.loan_term) : null,
       })
-      .select()
-      .single()
     if (error) throw error
-    return Response.json(data, { status: 201 })
+    return Response.json({ ok: true }, { status: 201 })
   } catch (err) {
+    console.error('[/api/searches]', err.message)
     return Response.json({ error: err.message }, { status: 500 })
   }
 }

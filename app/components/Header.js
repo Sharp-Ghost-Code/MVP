@@ -2,7 +2,6 @@ export default function Header({ activePage = 'home' }) {
   const navLinks = [
     { href: '/', label: 'Compare', key: 'compare' },
     { href: '#', label: 'Budget', key: 'budget' },
-    { href: '/results', label: 'Analysis', key: 'analysis' },
     { href: '#', label: 'Inventory', key: 'inventory' },
   ]
 

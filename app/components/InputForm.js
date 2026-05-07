@@ -5,10 +5,30 @@ import { useRouter } from 'next/navigation'
 const DRIVETRAINS = ['Any', 'FWD', 'AWD', '4WD']
 
 const SLIDERS = [
-  { key: 'wtCost', label: 'Total Cost', defaultVal: 75 },
-  { key: 'wtReliability', label: 'Reliability', defaultVal: 90 },
-  { key: 'wtSafety', label: 'Safety', defaultVal: 80 },
-  { key: 'wtResale', label: 'Resale Value', defaultVal: 60 },
+  {
+    key: 'wtCost',
+    label: 'Total Cost',
+    defaultVal: 75,
+    hint: 'Weights the 5-year net cost including fuel, depreciation, and any financing',
+  },
+  {
+    key: 'wtReliability',
+    label: 'Reliability',
+    defaultVal: 90,
+    hint: 'Critical if keeping 5+ years. Small score gaps compound into real repair costs over time.',
+  },
+  {
+    key: 'wtSafety',
+    label: 'Safety',
+    defaultVal: 80,
+    hint: 'Covers crash test ratings and active prevention systems like automatic braking',
+  },
+  {
+    key: 'wtResale',
+    label: 'Resale Value',
+    defaultVal: 60,
+    hint: 'More important for shorter ownership. You recover more of your purchase price at resale.',
+  },
 ]
 
 export default function InputForm() {
@@ -25,17 +45,32 @@ export default function InputForm() {
   const [downPayment, setDownPayment] = useState('')
   const [interestRate, setInterestRate] = useState('')
   const [loanTerm, setLoanTerm] = useState('60')
+  const [errors, setErrors] = useState({})
 
   function setSlider(key, val) {
     setSliderValues(prev => ({ ...prev, [key]: val }))
   }
 
   function handleSubmit() {
+    const newErrors = {}
+    if (!budget)        newErrors.budget        = 'Please enter your maximum budget'
+    if (!milesPerYear)  newErrors.milesPerYear  = 'Please enter your annual mileage'
+    if (!ownershipYears) newErrors.ownershipYears = 'Please enter how long you plan to keep the car'
+    if (!fuelPrice)     newErrors.fuelPrice     = 'Please enter your local fuel price'
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      const firstKey = Object.keys(newErrors)[0]
+      document.getElementById(firstKey)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+
+    setErrors({})
     const payload = {
-      budget: budget || '35000',
-      miles: milesPerYear || '12000',
-      years: ownershipYears || '5',
-      fuel_price: fuelPrice || '3.85',
+      budget,
+      miles: milesPerYear,
+      years: ownershipYears,
+      fuel_price: fuelPrice,
       seats: minSeats,
       fuel_type: fuelType,
       drivetrain,
@@ -48,7 +83,6 @@ export default function InputForm() {
       ...(interestRate && { interest_rate: interestRate }),
     }
 
-    // fire-and-forget: log search to DB, don't block navigation
     fetch('/api/searches', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -73,8 +107,11 @@ export default function InputForm() {
       </div>
 
       {/* Form Card */}
-      <div className="w-full max-w-3xl glass-card rounded-2xl shadow-2xl shadow-primary-fixed/30 overflow-hidden">
+      <div className="w-full max-w-5xl glass-card rounded-2xl shadow-2xl shadow-primary-fixed/30 overflow-hidden">
         <div className="p-lg md:p-xl space-y-xl">
+
+          {/* Sections: Your Details + What Matters Most — side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl items-start">
 
           {/* Section 1: Your Details */}
           <section>
@@ -82,56 +119,81 @@ export default function InputForm() {
               <span className="material-symbols-outlined text-primary">person</span>
               <h2 className="font-headline-md text-headline-md text-on-surface">Your Details</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-lg">
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  MAX BUDGET ($)
+                  MAX BUDGET ($) <span className="text-error">*</span>
                 </label>
                 <input
+                  id="budget"
                   type="number"
                   placeholder="e.g. 45000"
                   value={budget}
-                  onChange={e => setBudget(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md"
+                  onChange={e => { setBudget(e.target.value); setErrors(prev => ({ ...prev, budget: null })) }}
+                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.budget ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
                 />
+                {errors.budget
+                  ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.budget}</p>
+                  : <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">Sets a hard ceiling. Only vehicles at or below this price are shown.</p>
+                }
               </div>
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  MILES PER YEAR
+                  MILES PER YEAR <span className="text-error">*</span>
                 </label>
                 <input
+                  id="milesPerYear"
                   type="number"
                   placeholder="e.g. 12000"
                   value={milesPerYear}
-                  onChange={e => setMilesPerYear(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md"
+                  onChange={e => { setMilesPerYear(e.target.value); setErrors(prev => ({ ...prev, milesPerYear: null })) }}
+                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.milesPerYear ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
                 />
+                {errors.milesPerYear
+                  ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.milesPerYear}</p>
+                  : <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">Higher mileage increases fuel and wear costs significantly over time</p>
+                }
               </div>
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  YEARS OF OWNERSHIP
+                  YEARS OF OWNERSHIP <span className="text-error">*</span>
                 </label>
                 <input
+                  id="ownershipYears"
                   type="number"
                   placeholder="e.g. 5"
                   value={ownershipYears}
-                  onChange={e => setOwnershipYears(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md"
+                  onChange={e => { setOwnershipYears(e.target.value); setErrors(prev => ({ ...prev, ownershipYears: null })) }}
+                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.ownershipYears ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
                 />
+                {errors.ownershipYears
+                  ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.ownershipYears}</p>
+                  : <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">This affects depreciation vs. reliability importance in your results</p>
+                }
               </div>
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  FUEL PRICE ($/GAL)
+                  FUEL PRICE ($/GAL) <span className="text-error">*</span>
                 </label>
                 <input
+                  id="fuelPrice"
                   type="number"
                   placeholder="e.g. 3.85"
                   step="0.01"
                   value={fuelPrice}
-                  onChange={e => setFuelPrice(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md"
+                  onChange={e => { setFuelPrice(e.target.value); setErrors(prev => ({ ...prev, fuelPrice: null })) }}
+                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.fuelPrice ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
                 />
+                {errors.fuelPrice
+                  ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.fuelPrice}</p>
+                  : <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">Used to estimate total fuel spend across your full ownership period</p>
+                }
               </div>
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
                   MINIMUM SEATS
@@ -146,7 +208,11 @@ export default function InputForm() {
                   <option value="7">7</option>
                   <option value="8+">8+</option>
                 </select>
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  Filters out vehicles below this seating capacity
+                </p>
               </div>
+
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
                   FUEL TYPE PREFERENCE
@@ -161,7 +227,11 @@ export default function InputForm() {
                   <option value="Hybrid">Hybrid</option>
                   <option value="Electric">Electric</option>
                 </select>
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  Choose Any to compare all powertrains side by side
+                </p>
               </div>
+
               <div className="md:col-span-2 flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
                   DRIVETRAIN
@@ -182,14 +252,16 @@ export default function InputForm() {
                     </button>
                   ))}
                 </div>
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  AWD/4WD adds upfront cost but improves traction in snow or rough terrain
+                </p>
               </div>
+
             </div>
           </section>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-outline-variant/40 to-transparent" />
-
           {/* Section 2: What Matters Most */}
-          <section>
+          <section className="border-l border-outline-variant/30 pl-xl">
             <div className="flex items-center gap-md mb-lg">
               <span className="material-symbols-outlined text-tertiary">analytics</span>
               <h2 className="font-headline-md text-headline-md text-on-surface">
@@ -197,8 +269,8 @@ export default function InputForm() {
               </h2>
             </div>
             <div className="space-y-xl">
-              {SLIDERS.map(({ key, label }) => (
-                <div key={key} className="space-y-md">
+              {SLIDERS.map(({ key, label, hint }) => (
+                <div key={key} className="space-y-sm">
                   <div className="flex justify-between items-end">
                     <label className="font-title-sm text-title-sm text-on-surface font-semibold">
                       {label}
@@ -215,10 +287,15 @@ export default function InputForm() {
                     onChange={e => setSlider(key, parseInt(e.target.value))}
                     className="w-full h-[6px] bg-surface-container-high rounded-full appearance-none cursor-pointer slider-thumb"
                   />
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60">
+                    {hint}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
+
+          </div>{/* end two-column grid */}
 
           {/* Collapsible Financing */}
           <details className="group bg-surface-container-low/50 rounded-2xl border border-outline-variant/30 overflow-hidden">
@@ -245,6 +322,9 @@ export default function InputForm() {
                   onChange={e => setDownPayment(e.target.value)}
                   className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
                 />
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  Reduces your loan principal and total interest paid
+                </p>
               </div>
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
@@ -258,6 +338,9 @@ export default function InputForm() {
                   onChange={e => setInterestRate(e.target.value)}
                   className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
                 />
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  Check your bank or credit union for current rates before estimating
+                </p>
               </div>
               <div className="flex flex-col gap-xs">
                 <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
@@ -273,6 +356,9 @@ export default function InputForm() {
                   <option value="60">60</option>
                   <option value="72">72</option>
                 </select>
+                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                  Longer terms lower monthly payments but increase total interest paid
+                </p>
               </div>
             </div>
           </details>

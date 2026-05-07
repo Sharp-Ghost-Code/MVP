@@ -1,6 +1,8 @@
 import Header from '@/app/components/Header'
 import Footer from '@/app/components/Footer'
 import { createClient } from '@/lib/supabase'
+import { scoreAndRank } from '@/lib/scoring'
+import { generateInsightsWithAI, generateInsightFallback } from '@/lib/insights'
 
 export const metadata = {
   title: 'Your Recommendations | Car Recommender',
@@ -24,9 +26,8 @@ async function fetchVehicles(params) {
     query = query.gte('seating_capacity', parseInt(params.seats))
   }
 
-  const { data, error } = await query
-    .order('reliability_score', { ascending: false })
-    .limit(5)
+  // Fetch a wider pool so the scoring engine has enough candidates to rank meaningfully
+  const { data, error } = await query.limit(50)
 
   if (error) throw error
   return data || []
@@ -36,35 +37,22 @@ async function fetchVehicles(params) {
 
 function toStats(v) {
   return [
-    { label: 'Purchase Price', value: `$${v.price.toLocaleString()}`, highlight: null },
-    { label: 'MPG Combined', value: v.mpg_combined ? `${v.mpg_combined} mpg` : 'N/A', highlight: 'primary' },
-    { label: 'Reliability', value: `${v.reliability_score}/100`, highlight: null },
-    { label: 'Safety Rating', value: v.safety_rating ? `${v.safety_rating}/10` : 'N/A', highlight: null },
+    { label: 'Purchase Price',   value: `$${v.price.toLocaleString()}`,                                       highlight: null      },
+    { label: 'Est. 5yr TCO',     value: v._tcoDisplay ? `$${v._tcoDisplay.toLocaleString()}` : 'N/A',         highlight: 'primary' },
+    { label: 'MPG Combined',     value: v.mpg_combined ? `${v.mpg_combined} mpg` : 'N/A',                     highlight: null      },
+    { label: 'Reliability',      value: `${v.reliability_score}/100`,                                         highlight: null      },
+    { label: 'Safety Rating',    value: v.safety_rating ? `${v.safety_rating}/10` : 'N/A',                    highlight: null      },
     { label: 'Resale (5yr est.)', value: v.resale_value_5yr ? `$${v.resale_value_5yr.toLocaleString()}` : 'N/A', highlight: 'tertiary' },
-    { label: 'Current Miles', value: v.mileage.toLocaleString(), highlight: null },
   ]
 }
 
 function toBreakdown(v) {
+  const d = v._dimensions || { cost: 0, reliability: 0, safety: 0, resale: 0 }
   return [
-    {
-      label: 'Reliability',
-      width: v.reliability_score || 0,
-      colorClass: 'from-tertiary to-tertiary-fixed-dim',
-      glow: true,
-    },
-    {
-      label: 'Safety Rating',
-      width: v.safety_rating ? Math.round(v.safety_rating * 10) : 0,
-      colorClass: 'from-tertiary to-tertiary-fixed-dim',
-      glow: false,
-    },
-    {
-      label: 'Equity Retention',
-      width: v.depreciation_rate ? Math.max(0, Math.round(100 - v.depreciation_rate)) : 50,
-      colorClass: 'from-primary to-primary-container',
-      glow: false,
-    },
+    { label: 'Cost Efficiency', width: d.cost,        colorClass: 'from-primary to-primary-container',       glow: false },
+    { label: 'Reliability',     width: d.reliability, colorClass: 'from-tertiary to-tertiary-fixed-dim',     glow: true  },
+    { label: 'Safety',          width: d.safety,      colorClass: 'from-tertiary to-tertiary-fixed-dim',     glow: false },
+    { label: 'Resale Value',    width: d.resale,      colorClass: 'from-secondary to-secondary-fixed-dim',   glow: false },
   ]
 }
 
@@ -75,6 +63,27 @@ function toTags(v) {
   if (v.seating_capacity >= 7) tags.push(`${v.seating_capacity}-Seat`)
   return tags
 }
+
+
+// ─── Learn more content ───────────────────────────────────────────────────────
+
+const LEARN_MORE = [
+  {
+    icon: 'calculate',
+    title: 'How we calculate the 5-year TCO',
+    body: 'TCO = Purchase price + (miles/year x years x fuel price / MPG) + financing interest, minus estimated resale value at end of ownership. This produces a single net out-of-pocket figure that makes different vehicles directly comparable regardless of sticker price.',
+  },
+  {
+    icon: 'timeline',
+    title: 'Why ownership length changes what matters',
+    body: 'In the first 1-2 years, depreciation drives most of your cost. Beyond 3-4 years, reliability and maintenance become the bigger variable. A vehicle with a 92 reliability score may cost thousands less than an 85-score alternative over 7 years, even if its sticker price is higher.',
+  },
+  {
+    icon: 'tune',
+    title: 'How the match score is calculated',
+    body: 'Each vehicle is scored across four dimensions: total cost, reliability, safety, and resale value. Within your results, every dimension is normalized 0-100 relative to the other vehicles shown, not industry averages. Your weight sliders combine these into a composite score, so 95% match means this vehicle is near-optimal for your specific priorities.',
+  },
+]
 
 // ─── Rank config ──────────────────────────────────────────────────────────────
 
@@ -98,12 +107,21 @@ export default async function ResultsPage({ searchParams }) {
 
   let vehicles = []
   let setupRequired = false
+  let aiInsights = null
 
   try {
-    vehicles = await fetchVehicles(params)
+    const pool = await fetchVehicles(params)
+    vehicles = scoreAndRank(pool, params).slice(0, 5)
   } catch (err) {
-    if (err.message?.includes('Missing Supabase')) {
-      setupRequired = true
+    console.error('[/results]', err.message)
+    setupRequired = true
+  }
+
+  if (vehicles.length > 0) {
+    try {
+      aiInsights = await generateInsightsWithAI(vehicles, params)
+    } catch (err) {
+      console.error('[/results AI insights]', err.message)
     }
   }
 
@@ -173,16 +191,29 @@ export default async function ResultsPage({ searchParams }) {
 
         {/* Vehicle cards */}
         {vehicles.map((vehicle, index) => {
-          const rank = RANKS[index] || RANKS[2]
-          const stats = toStats(vehicle)
+          const rank      = RANKS[index] || RANKS[2]
+          const stats     = toStats(vehicle)
           const breakdown = toBreakdown(vehicle)
-          const tags = toTags(vehicle)
+          const tags      = toTags(vehicle)
+          const insight   = aiInsights?.[index] ?? generateInsightFallback(vehicle, params, index, vehicles)
 
           return (
             <article
               key={vehicle.id}
               className="card-glass rounded-[2rem] shadow-[0px_20px_50px_rgba(0,0,0,0.08)] border border-white overflow-hidden relative group transition-all hover:shadow-[0px_30px_60px_rgba(0,0,0,0.12)]"
             >
+              {/* Match score */}
+              <div className="absolute top-6 right-8 flex flex-col items-center z-10">
+                <div className="w-[72px] h-[72px] rounded-full bg-primary/5 border-2 border-primary/20 flex flex-col items-center justify-center shadow-sm">
+                  <span className="font-extrabold text-[22px] leading-none text-primary">
+                    {vehicle._matchScore}
+                  </span>
+                  <span className="font-label-caps text-[9px] text-primary/70 tracking-widest mt-0.5">
+                    MATCH
+                  </span>
+                </div>
+              </div>
+
               {/* Rank badge */}
               <div
                 className={`absolute top-0 left-0 ${rank.badgeClass} font-bold px-8 py-4 rounded-br-[2rem] shadow-xl z-10 flex items-center gap-2`}
@@ -229,6 +260,39 @@ export default async function ResultsPage({ searchParams }) {
                         ))}
                       </div>
                     </div>
+
+                    {/* Insight block */}
+                    <div className="space-y-3">
+                      {insight.costSummary && (
+                        <p className="font-body-sm text-[13px] text-on-surface leading-relaxed">
+                          {insight.costSummary}
+                          {insight.contextLine && (
+                            <span className="text-on-surface-variant"> {insight.contextLine}</span>
+                          )}
+                        </p>
+                      )}
+                      {insight.rankReason && (
+                        <div className="flex gap-2 items-start">
+                          <span className="material-symbols-outlined text-[16px] mt-0.5 flex-shrink-0 text-primary">
+                            {index === 0 ? 'emoji_events' : 'info'}
+                          </span>
+                          <p className="font-body-sm text-[13px] text-on-surface-variant leading-relaxed">
+                            {insight.rankReason}
+                          </p>
+                        </div>
+                      )}
+                      {insight.noiseNote && (
+                        <div className="flex gap-2 items-start opacity-70">
+                          <span className="material-symbols-outlined text-secondary text-[14px] mt-0.5 flex-shrink-0">
+                            remove_circle
+                          </span>
+                          <p className="font-body-sm text-[12px] text-on-surface-variant italic leading-relaxed">
+                            {insight.noiseNote}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
 
                   {/* Stats + breakdown */}
@@ -253,7 +317,7 @@ export default async function ResultsPage({ searchParams }) {
                     <div className="space-y-6">
                       <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-[0.15em] font-extrabold flex items-center gap-2">
                         <span className="w-8 h-[1px] bg-outline-variant" />
-                        Analysis Breakdown
+                        Score Breakdown
                       </h3>
                       <div className="grid gap-y-4">
                         {breakdown.map(bar => (
@@ -297,6 +361,37 @@ export default async function ResultsPage({ searchParams }) {
             </article>
           )
         })}
+
+        {/* Learn more / methodology */}
+        {!setupRequired && vehicles.length > 0 && (
+          <section className="space-y-3 pt-4">
+            <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-[0.15em] font-extrabold flex items-center gap-2">
+              <span className="w-8 h-[1px] bg-outline-variant" />
+              How the scoring works
+            </h3>
+            {LEARN_MORE.map(item => (
+              <details
+                key={item.title}
+                className="group bg-surface-container-low/50 rounded-xl border border-outline-variant/20 overflow-hidden"
+              >
+                <summary className="flex justify-between items-center px-lg py-md cursor-pointer list-none hover:bg-surface-container-low transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-secondary text-[18px]">{item.icon}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface font-medium">{item.title}</span>
+                  </div>
+                  <span className="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary text-[18px]">
+                    expand_more
+                  </span>
+                </summary>
+                <div className="px-lg pb-md pt-1">
+                  <p className="font-body-sm text-[13px] text-on-surface-variant leading-relaxed">
+                    {item.body}
+                  </p>
+                </div>
+              </details>
+            ))}
+          </section>
+        )}
 
         {/* Refine CTA */}
         {!setupRequired && (
