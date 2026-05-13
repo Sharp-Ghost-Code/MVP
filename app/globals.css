@@ -151,32 +151,116 @@
   vertical-align: middle;
 }
 
-/* ─── Range slider thumb ─────────────────────────────────────────────────────── */
+/* ─── Range slider — Premium Glass Sphere ───────────────────────────────────── */
 
-.slider-thumb::-webkit-slider-thumb {
+.slider-glassy {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
-  background: #2563eb;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
   cursor: pointer;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease;
+  outline: none;
+  /* Deep neumorphic trough */
+  box-shadow:
+    inset 2px 3px 7px rgba(0, 0, 0, 0.14),
+    inset -1px -1px 4px rgba(255, 255, 255, 0.9);
+  transition: background 0.12s ease;
 }
 
-.slider-thumb:hover::-webkit-slider-thumb {
-  transform: scale(1.1);
-  background: #004ac6;
+/* Firefox track */
+.slider-glassy::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  box-shadow:
+    inset 2px 3px 7px rgba(0, 0, 0, 0.14),
+    inset -1px -1px 4px rgba(255, 255, 255, 0.9);
 }
 
-.slider-thumb::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  background: #2563eb;
-  cursor: pointer;
+/* ── Webkit thumb ─────────────────────────────────────────────────────────── */
+
+.slider-glassy::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+  cursor: grab;
+  /* Glass sphere: sharp specular at top-left → lavender-blue body → deep navy */
+  background: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 1)    0%,
+    rgba(255, 255, 255, 0.7)  14%,
+    rgba(139, 148, 255, 0.9)  42%,
+    #2563eb                   68%,
+    #004ac6                   100%
+  );
+  /* Layer 1 — tight white ring (glass edge)
+     Layer 2 — indigo color halo
+     Layer 3 — diffuse ambient glow
+     Layer 4 — grounded drop shadow */
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.96),
+    0 0 0 5.5px rgba(99, 102, 241, 0.22),
+    0 0 22px  rgba(99, 102, 241, 0.45),
+    0 4px 16px rgba(0, 74, 198, 0.45);
+  transition:
+    transform  0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.22s ease;
+}
+
+/* hover: spring scale-up + expanded purple glow */
+.slider-glassy:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
+  cursor: grab;
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.96),
+    0 0 0 7px   rgba(99, 102, 241, 0.3),
+    0 0 34px    rgba(99, 102, 241, 0.6),
+    0 6px 22px  rgba(0, 74, 198, 0.5);
+}
+
+/* active/drag: press-in feel + pulsed outer ring */
+.slider-glassy:active::-webkit-slider-thumb {
+  transform: scale(1.08);
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.92),
+    0 0 0 11px  rgba(99, 102, 241, 0.18),
+    0 0 28px    rgba(99, 102, 241, 0.45),
+    0 2px 10px  rgba(0, 74, 198, 0.5);
+}
+
+/* keyboard focus: clear accessible ring */
+.slider-glassy:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.96),
+    0 0 0 5.5px rgba(99, 102, 241, 0.4),
+    0 0 0 8px   rgba(99, 102, 241, 0.12),
+    0 0 28px    rgba(99, 102, 241, 0.5),
+    0 4px 16px  rgba(0, 74, 198, 0.45);
+}
+
+/* ── Firefox thumb ────────────────────────────────────────────────────────── */
+
+.slider-glassy::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: grab;
+  background: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 1)    0%,
+    rgba(255, 255, 255, 0.7)  14%,
+    rgba(139, 148, 255, 0.9)  42%,
+    #2563eb                   68%,
+    #004ac6                   100%
+  );
+  box-shadow:
+    0 0 0 2.5px rgba(255, 255, 255, 0.96),
+    0 0 0 5.5px rgba(99, 102, 241, 0.22),
+    0 0 22px    rgba(99, 102, 241, 0.45),
+    0 4px 16px  rgba(0, 74, 198, 0.45);
 }

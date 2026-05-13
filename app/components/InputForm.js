@@ -45,6 +45,7 @@ export default function InputForm() {
   const [downPayment, setDownPayment] = useState('')
   const [interestRate, setInterestRate] = useState('')
   const [loanTerm, setLoanTerm] = useState('60')
+  const [showFinancing, setShowFinancing] = useState(false)
   const [errors, setErrors] = useState({})
 
   function setSlider(key, val) {
@@ -128,6 +129,7 @@ export default function InputForm() {
                 <input
                   id="budget"
                   type="number"
+                  min="0"
                   placeholder="e.g. 45000"
                   value={budget}
                   onChange={e => { setBudget(e.target.value); setErrors(prev => ({ ...prev, budget: null })) }}
@@ -146,6 +148,7 @@ export default function InputForm() {
                 <input
                   id="milesPerYear"
                   type="number"
+                  min="0"
                   placeholder="e.g. 12000"
                   value={milesPerYear}
                   onChange={e => { setMilesPerYear(e.target.value); setErrors(prev => ({ ...prev, milesPerYear: null })) }}
@@ -164,6 +167,7 @@ export default function InputForm() {
                 <input
                   id="ownershipYears"
                   type="number"
+                  min="0"
                   placeholder="e.g. 5"
                   value={ownershipYears}
                   onChange={e => { setOwnershipYears(e.target.value); setErrors(prev => ({ ...prev, ownershipYears: null })) }}
@@ -182,8 +186,9 @@ export default function InputForm() {
                 <input
                   id="fuelPrice"
                   type="number"
-                  placeholder="e.g. 3.85"
+                  min="0"
                   step="0.01"
+                  placeholder="e.g. 3.85"
                   value={fuelPrice}
                   onChange={e => { setFuelPrice(e.target.value); setErrors(prev => ({ ...prev, fuelPrice: null })) }}
                   className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.fuelPrice ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
@@ -203,8 +208,12 @@ export default function InputForm() {
                   onChange={e => setMinSeats(e.target.value)}
                   className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md appearance-none cursor-pointer"
                 >
+                  <option value="1">1</option>
                   <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
                   <option value="5">5</option>
+                  <option value="6">6</option>
                   <option value="7">7</option>
                   <option value="8+">8+</option>
                 </select>
@@ -285,7 +294,10 @@ export default function InputForm() {
                     max="100"
                     value={sliderValues[key]}
                     onChange={e => setSlider(key, parseInt(e.target.value))}
-                    className="w-full h-[6px] bg-surface-container-high rounded-full appearance-none cursor-pointer slider-thumb"
+                    className="slider-glassy"
+                    style={{
+                      background: `linear-gradient(to right, #2563eb 0%, #6366f1 ${sliderValues[key]}%, rgba(203,213,225,0.32) ${sliderValues[key]}%)`,
+                    }}
                   />
                   <p className="font-body-sm text-[11px] text-on-surface-variant/60">
                     {hint}
@@ -297,71 +309,104 @@ export default function InputForm() {
 
           </div>{/* end two-column grid */}
 
-          {/* Collapsible Financing */}
-          <details className="group bg-surface-container-low/50 rounded-2xl border border-outline-variant/30 overflow-hidden">
-            <summary className="flex justify-between items-center p-lg cursor-pointer list-none hover:bg-surface-container-low transition-colors">
+          {/* Financing Toggle */}
+          <div className="bg-surface-container-low/50 rounded-2xl border border-outline-variant/30 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowFinancing(prev => !prev)}
+              className="w-full flex justify-between items-center p-lg hover:bg-surface-container-low transition-colors"
+            >
               <div className="flex items-center gap-md">
                 <span className="material-symbols-outlined text-secondary text-xl">payments</span>
-                <h2 className="font-title-sm text-title-sm text-on-surface font-semibold">
-                  Include Financing Options
-                </h2>
+                <div className="text-left">
+                  <p className="font-title-sm text-title-sm text-on-surface font-semibold">
+                    Include Financing Options
+                  </p>
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60 mt-0.5">
+                    Factor in your loan for accurate total cost estimates
+                  </p>
+                </div>
               </div>
-              <span className="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary">
-                expand_more
-              </span>
-            </summary>
-            <div className="px-lg pb-lg grid grid-cols-1 md:grid-cols-3 gap-lg">
-              <div className="flex flex-col gap-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  DOWN PAYMENT ($)
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 5000"
-                  value={downPayment}
-                  onChange={e => setDownPayment(e.target.value)}
-                  className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
+              {/* Toggle pill — 48×28px container, 20×20px knob */}
+              <div
+                aria-checked={showFinancing}
+                role="switch"
+                className={`relative flex-shrink-0 rounded-full transition-colors duration-300`}
+                style={{ width: 48, height: 28, background: showFinancing ? 'var(--color-primary)' : 'var(--color-surface-container-highest)' }}
+              >
+                <span
+                  className="absolute rounded-full bg-white transition-all duration-300"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    top: 4,
+                    left: showFinancing ? 24 : 4,
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.22), inset 0 1px 2px rgba(255,255,255,0.8)',
+                  }}
                 />
-                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
-                  Reduces your loan principal and total interest paid
-                </p>
               </div>
-              <div className="flex flex-col gap-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  INTEREST RATE %
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 4.5"
-                  step="0.1"
-                  value={interestRate}
-                  onChange={e => setInterestRate(e.target.value)}
-                  className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
-                />
-                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
-                  Check your bank or credit union for current rates before estimating
-                </p>
-              </div>
-              <div className="flex flex-col gap-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
-                  LOAN TERM (MO)
-                </label>
-                <select
-                  value={loanTerm}
-                  onChange={e => setLoanTerm(e.target.value)}
-                  className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm appearance-none cursor-pointer transition-all"
-                >
-                  <option value="36">36</option>
-                  <option value="48">48</option>
-                  <option value="60">60</option>
-                  <option value="72">72</option>
-                </select>
-                <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
-                  Longer terms lower monthly payments but increase total interest paid
-                </p>
+            </button>
+
+            {/* Expandable fields */}
+            <div
+              className="transition-all duration-300 ease-in-out overflow-hidden"
+              style={{ maxHeight: showFinancing ? '320px' : '0px', opacity: showFinancing ? 1 : 0 }}
+            >
+              <div className="px-lg pb-lg grid grid-cols-1 md:grid-cols-3 gap-lg">
+                <div className="flex flex-col gap-xs">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
+                    DOWN PAYMENT ($)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 5000"
+                    value={downPayment}
+                    onChange={e => setDownPayment(e.target.value)}
+                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
+                  />
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                    Reduces your loan principal and total interest paid
+                  </p>
+                </div>
+                <div className="flex flex-col gap-xs">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
+                    INTEREST RATE %
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder="e.g. 4.5"
+                    value={interestRate}
+                    onChange={e => setInterestRate(e.target.value)}
+                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
+                  />
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                    Check your bank or credit union for current rates before estimating
+                  </p>
+                </div>
+                <div className="flex flex-col gap-xs">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">
+                    LOAN TERM (MO)
+                  </label>
+                  <select
+                    value={loanTerm}
+                    onChange={e => setLoanTerm(e.target.value)}
+                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm appearance-none cursor-pointer transition-all"
+                  >
+                    <option value="36">36</option>
+                    <option value="48">48</option>
+                    <option value="60">60</option>
+                    <option value="72">72</option>
+                  </select>
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
+                    Longer terms lower monthly payments but increase total interest paid
+                  </p>
+                </div>
               </div>
             </div>
-          </details>
+          </div>
 
           {/* Submit */}
           <button
