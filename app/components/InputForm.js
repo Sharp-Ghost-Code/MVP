@@ -331,8 +331,15 @@ export default function InputForm() {
               <div
                 aria-checked={showFinancing}
                 role="switch"
-                className={`relative flex-shrink-0 rounded-full transition-colors duration-300`}
-                style={{ width: 48, height: 28, background: showFinancing ? 'var(--color-primary)' : 'var(--color-surface-container-highest)' }}
+                className="relative flex-shrink-0 rounded-full transition-all duration-300"
+                style={{
+                  width: 48,
+                  height: 28,
+                  background: showFinancing ? 'linear-gradient(145deg, #2c6ef7, #1d56e0)' : '#ddeaf5',
+                  boxShadow: showFinancing
+                    ? '4px 4px 10px rgba(0,74,198,0.38), -2px -2px 6px rgba(255,255,255,0.45)'
+                    : 'inset 3px 3px 7px rgba(152,182,208,0.44), inset -2px -2px 5px rgba(255,255,255,0.96)',
+                }}
               >
                 <span
                   className="absolute rounded-full bg-white transition-all duration-300"
@@ -341,7 +348,9 @@ export default function InputForm() {
                     height: 20,
                     top: 4,
                     left: showFinancing ? 24 : 4,
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.22), inset 0 1px 2px rgba(255,255,255,0.8)',
+                    boxShadow: showFinancing
+                      ? '3px 3px 8px rgba(0,74,198,0.28), -2px -2px 5px rgba(255,255,255,0.7)'
+                      : '3px 3px 8px rgba(152,182,208,0.4), -2px -2px 5px rgba(255,255,255,0.98)',
                   }}
                 />
               </div>
@@ -409,14 +418,16 @@ export default function InputForm() {
           </div>
 
           {/* Submit */}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="w-full bg-primary text-on-primary font-headline-md text-headline-md py-lg rounded-2xl hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 active:scale-[0.99] transition-all flex items-center justify-center gap-md"
-          >
-            Get My Recommendations
-            <span className="material-symbols-outlined font-bold">arrow_forward</span>
-          </button>
+          <div className="w-full rounded-2xl p-6 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="w-full neuro-btn-primary text-on-surface font-headline-md text-headline-md py-lg rounded-xl flex items-center justify-center gap-md"
+            >
+              Get My Recommendations
+              <span className="material-symbols-outlined font-bold">arrow_forward</span>
+            </button>
+          </div>
 
         </div>
       </div>

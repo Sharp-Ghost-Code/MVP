@@ -121,10 +121,13 @@
 /* ─── Custom component utilities ───────────────────────────────────────────── */
 
 @utility glass-card {
-  background: #f0f7fd;
+  background: rgba(240, 247, 253, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    7px 7px 18px rgba(152, 182, 208, 0.48),
-    -6px -6px 14px rgba(255, 255, 255, 0.97);
+    0 8px 32px 0 rgba(31, 38, 135, 0.07),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 @utility card-glass {
@@ -144,6 +147,15 @@
 
 @utility progress-glow {
   box-shadow: 0 0 8px rgba(0, 98, 66, 0.2);
+}
+
+/* ─── Page background gradient ─────────────────────────────────────────────── */
+
+@utility bg-page-gradient {
+  background:
+    radial-gradient(ellipse 90% 65% at 12% 8%, rgba(210, 232, 252, 0.72) 0%, transparent 58%),
+    radial-gradient(ellipse 65% 55% at 88% 88%, rgba(190, 218, 248, 0.48) 0%, transparent 55%),
+    #eaf2f9;
 }
 
 /* ─── Neumorphic component classes ──────────────────────────────────────────── */
@@ -207,6 +219,117 @@
     inset 4px 4px 8px rgba(152, 182, 208, 0.45),
     inset -2px -2px 6px rgba(255, 255, 255, 0.92);
   border: none;
+}
+
+/* ─── Button style library (from reference) ─────────────────────────────────── */
+
+.glass-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.soft-3d-btn {
+  background: linear-gradient(145deg, #ffffff, #dcdcdc);
+  box-shadow: 0 4px 0 #b0b0b0, 0 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease;
+}
+
+.soft-3d-btn:active {
+  box-shadow: 0 2px 0 #b0b0b0, 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);
+}
+
+.mesh-gradient-btn {
+  background-color: #ff9a9e;
+  background-image:
+    radial-gradient(at 0% 0%, #ff9a9e 0, transparent 50%),
+    radial-gradient(at 50% 0%, #fad0c4 0, transparent 50%),
+    radial-gradient(at 100% 0%, #fbc2eb 0, transparent 50%);
+  background-size: 200% 200%;
+  animation: mesh-move 5s ease infinite;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes mesh-move {
+  0%   { background-position: 0% 50% }
+  50%  { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
+.neon-btn {
+  background: transparent;
+  border: 2px solid #00f3ff;
+  color: #00f3ff;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: 0.5s;
+}
+
+.neon-btn:hover {
+  background: #00f3ff;
+  color: #000;
+  box-shadow: 0 0 20px #00f3ff, 0 0 40px #00f3ff;
+}
+
+/* alias used by the CTA */
+.neuro-btn-primary {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.5);
+  color: #2563eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.neuro-btn-primary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px 0 rgba(31, 38, 135, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.6);
+  color: #1d4ed8;
+}
+
+.neuro-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Shine effect */
+.neuro-btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: none;
+}
+
+.neuro-btn-primary:hover::after {
+  left: 100%;
+  transition: left 0.8s ease-in-out;
 }
 
 /* ─── Material Symbols base ─────────────────────────────────────────────────── */
