@@ -108,7 +108,7 @@ export default function InputForm() {
       </div>
 
       {/* Form Card */}
-      <div className="w-full max-w-5xl glass-card rounded-2xl shadow-2xl shadow-primary-fixed/30 overflow-hidden">
+      <div className="w-full max-w-5xl glass-card rounded-3xl overflow-hidden">
         <div className="p-lg md:p-xl space-y-xl">
 
           {/* Sections: Your Details + What Matters Most — side by side */}
@@ -133,7 +133,7 @@ export default function InputForm() {
                   placeholder="e.g. 45000"
                   value={budget}
                   onChange={e => { setBudget(e.target.value); setErrors(prev => ({ ...prev, budget: null })) }}
-                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.budget ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
+                  className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.budget ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.budget
                   ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.budget}</p>
@@ -152,7 +152,7 @@ export default function InputForm() {
                   placeholder="e.g. 12000"
                   value={milesPerYear}
                   onChange={e => { setMilesPerYear(e.target.value); setErrors(prev => ({ ...prev, milesPerYear: null })) }}
-                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.milesPerYear ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
+                  className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.milesPerYear ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.milesPerYear
                   ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.milesPerYear}</p>
@@ -171,7 +171,7 @@ export default function InputForm() {
                   placeholder="e.g. 5"
                   value={ownershipYears}
                   onChange={e => { setOwnershipYears(e.target.value); setErrors(prev => ({ ...prev, ownershipYears: null })) }}
-                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.ownershipYears ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
+                  className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.ownershipYears ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.ownershipYears
                   ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.ownershipYears}</p>
@@ -191,7 +191,7 @@ export default function InputForm() {
                   placeholder="e.g. 3.85"
                   value={fuelPrice}
                   onChange={e => { setFuelPrice(e.target.value); setErrors(prev => ({ ...prev, fuelPrice: null })) }}
-                  className={`w-full bg-surface-container-lowest/50 border rounded-xl px-md py-3 focus:ring-4 outline-none transition-all font-body-md ${errors.fuelPrice ? 'border-error focus:border-error focus:ring-error/10' : 'border-outline-variant/50 focus:border-primary-container focus:ring-primary-container/10'}`}
+                  className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.fuelPrice ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.fuelPrice
                   ? <p className="font-body-sm text-[11px] text-error ml-1">{errors.fuelPrice}</p>
@@ -206,7 +206,7 @@ export default function InputForm() {
                 <select
                   value={minSeats}
                   onChange={e => setMinSeats(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md appearance-none cursor-pointer"
+                  className="w-full rounded-xl px-md py-3 font-body-md neuro-input appearance-none cursor-pointer"
                 >
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -229,7 +229,7 @@ export default function InputForm() {
                 <select
                   value={fuelType}
                   onChange={e => setFuelType(e.target.value)}
-                  className="w-full bg-surface-container-lowest/50 border border-outline-variant/50 rounded-xl px-md py-3 focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none transition-all font-body-md appearance-none cursor-pointer"
+                  className="w-full rounded-xl px-md py-3 font-body-md neuro-input appearance-none cursor-pointer"
                 >
                   <option value="Any">Any</option>
                   <option value="Gasoline">Gasoline</option>
@@ -253,8 +253,8 @@ export default function InputForm() {
                       onClick={() => setDrivetrain(dt)}
                       className={
                         drivetrain === dt
-                          ? 'px-md py-sm rounded-xl border-2 border-primary bg-primary text-on-primary font-body-sm font-semibold transition-all shadow-md shadow-primary/20'
-                          : 'px-md py-sm rounded-xl border-2 border-outline-variant/30 hover:border-primary/50 transition-all text-on-surface font-body-sm font-medium'
+                          ? 'px-md py-sm rounded-xl font-body-sm font-semibold transition-all neuro-btn-active text-primary'
+                          : 'px-md py-sm rounded-xl font-body-sm font-medium transition-all neuro-btn text-on-surface'
                       }
                     >
                       {dt}
@@ -296,7 +296,7 @@ export default function InputForm() {
                     onChange={e => setSlider(key, parseInt(e.target.value))}
                     className="slider-glassy"
                     style={{
-                      background: `linear-gradient(to right, #2563eb 0%, #6366f1 ${sliderValues[key]}%, rgba(203,213,225,0.32) ${sliderValues[key]}%)`,
+                      background: `linear-gradient(to right, #2563eb 0%, #60a5fa ${sliderValues[key]}%, rgba(221,234,245,0.5) ${sliderValues[key]}%)`,
                     }}
                   />
                   <p className="font-body-sm text-[11px] text-on-surface-variant/60">
@@ -310,7 +310,7 @@ export default function InputForm() {
           </div>{/* end two-column grid */}
 
           {/* Financing Toggle */}
-          <div className="bg-surface-container-low/50 rounded-2xl border border-outline-variant/30 overflow-hidden">
+          <div className="glass-card rounded-2xl overflow-hidden">
             <button
               type="button"
               onClick={() => setShowFinancing(prev => !prev)}
@@ -363,7 +363,7 @@ export default function InputForm() {
                     placeholder="e.g. 5000"
                     value={downPayment}
                     onChange={e => setDownPayment(e.target.value)}
-                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
+                    className="w-full rounded-xl px-md py-sm font-body-sm neuro-input"
                   />
                   <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
                     Reduces your loan principal and total interest paid
@@ -380,7 +380,7 @@ export default function InputForm() {
                     placeholder="e.g. 4.5"
                     value={interestRate}
                     onChange={e => setInterestRate(e.target.value)}
-                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm transition-all"
+                    className="w-full rounded-xl px-md py-sm font-body-sm neuro-input"
                   />
                   <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
                     Check your bank or credit union for current rates before estimating
@@ -393,7 +393,7 @@ export default function InputForm() {
                   <select
                     value={loanTerm}
                     onChange={e => setLoanTerm(e.target.value)}
-                    className="w-full bg-surface-container-lowest/80 border border-outline-variant/50 rounded-xl px-md py-sm focus:border-primary-container focus:ring-4 focus:ring-primary-container/10 outline-none font-body-sm appearance-none cursor-pointer transition-all"
+                    className="w-full rounded-xl px-md py-sm font-body-sm neuro-input appearance-none cursor-pointer"
                   >
                     <option value="36">36</option>
                     <option value="48">48</option>

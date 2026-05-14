@@ -31,25 +31,25 @@
   --color-on-tertiary-fixed: #002113;
   --color-on-tertiary-fixed-variant: #005236;
 
-  --color-surface: #f8f9fb;
-  --color-surface-dim: #d9dadc;
-  --color-surface-bright: #f8f9fb;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f3f4f6;
-  --color-surface-container: #edeef0;
-  --color-surface-container-high: #e7e8ea;
-  --color-surface-container-highest: #e1e2e4;
-  --color-surface-variant: #e1e2e4;
-  --color-on-surface: #191c1e;
-  --color-on-surface-variant: #434655;
-  --color-inverse-surface: #2e3132;
-  --color-inverse-on-surface: #f0f1f3;
+  --color-surface: #eaf2f9;
+  --color-surface-dim: #d8e8f4;
+  --color-surface-bright: #f8fbff;
+  --color-surface-container-lowest: #f8fbff;
+  --color-surface-container-low: #f2f7fc;
+  --color-surface-container: #eaf2f9;
+  --color-surface-container-high: #deeaf5;
+  --color-surface-container-highest: #d4e2ef;
+  --color-surface-variant: #d4e2ef;
+  --color-on-surface: #1c2d3e;
+  --color-on-surface-variant: #4a6378;
+  --color-inverse-surface: #1e2e3e;
+  --color-inverse-on-surface: #eaf2f9;
 
-  --color-outline: #737686;
-  --color-outline-variant: #c3c6d7;
+  --color-outline: #82a0b4;
+  --color-outline-variant: #c0d5e5;
 
-  --color-background: #f8f9fb;
-  --color-on-background: #191c1e;
+  --color-background: #eaf2f9;
+  --color-on-background: #1c2d3e;
 
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
@@ -121,14 +121,17 @@
 /* ─── Custom component utilities ───────────────────────────────────────────── */
 
 @utility glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #f0f7fd;
+  box-shadow:
+    7px 7px 18px rgba(152, 182, 208, 0.48),
+    -6px -6px 14px rgba(255, 255, 255, 0.97);
 }
 
 @utility card-glass {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(248, 249, 251, 1) 100%);
+  background: #f2f8fd;
+  box-shadow:
+    9px 9px 22px rgba(152, 182, 208, 0.46),
+    -7px -7px 16px rgba(255, 255, 255, 0.98);
 }
 
 @utility rank-badge-gold {
@@ -143,6 +146,69 @@
   box-shadow: 0 0 8px rgba(0, 98, 66, 0.2);
 }
 
+/* ─── Neumorphic component classes ──────────────────────────────────────────── */
+
+.neuro-input {
+  background: #ddeaf5;
+  box-shadow:
+    inset 4px 4px 8px rgba(152, 182, 208, 0.45),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.92);
+  border: none;
+  color: #1c2d3e;
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.neuro-input:focus {
+  box-shadow:
+    inset 2px 2px 6px rgba(152, 182, 208, 0.35),
+    inset -1px -1px 4px rgba(255, 255, 255, 0.96),
+    0 0 0 2.5px rgba(37, 99, 235, 0.28);
+  background: #e2eef8;
+  outline: none;
+}
+
+.neuro-input-error {
+  background: #ddeaf5;
+  box-shadow:
+    inset 4px 4px 8px rgba(186, 26, 26, 0.12),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.88),
+    0 0 0 2px rgba(186, 26, 26, 0.35);
+  border: none;
+  color: #1c2d3e;
+}
+
+.neuro-input-error:focus {
+  outline: none;
+  box-shadow:
+    inset 2px 2px 6px rgba(186, 26, 26, 0.1),
+    inset -1px -1px 4px rgba(255, 255, 255, 0.92),
+    0 0 0 2.5px rgba(186, 26, 26, 0.45);
+}
+
+.neuro-btn {
+  background: #eaf2f9;
+  box-shadow:
+    5px 5px 12px rgba(152, 182, 208, 0.45),
+    -4px -4px 9px rgba(255, 255, 255, 0.97);
+  border: none;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.neuro-btn:hover {
+  box-shadow:
+    6px 6px 15px rgba(152, 182, 208, 0.5),
+    -5px -5px 11px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.neuro-btn-active {
+  background: #dce8f4;
+  box-shadow:
+    inset 4px 4px 8px rgba(152, 182, 208, 0.45),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.92);
+  border: none;
+}
+
 /* ─── Material Symbols base ─────────────────────────────────────────────────── */
 
 .material-symbols-outlined {
@@ -151,7 +217,7 @@
   vertical-align: middle;
 }
 
-/* ─── Range slider — Premium Glass Sphere ───────────────────────────────────── */
+/* ─── Range slider — Neumorphic ─────────────────────────────────────────────── */
 
 .slider-glassy {
   -webkit-appearance: none;
@@ -161,23 +227,19 @@
   border-radius: 999px;
   cursor: pointer;
   outline: none;
-  /* Deep neumorphic trough */
   box-shadow:
-    inset 2px 3px 7px rgba(0, 0, 0, 0.14),
-    inset -1px -1px 4px rgba(255, 255, 255, 0.9);
+    inset 4px 4px 8px rgba(152, 182, 208, 0.45),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.92);
   transition: background 0.12s ease;
 }
 
-/* Firefox track */
 .slider-glassy::-moz-range-track {
   height: 10px;
   border-radius: 999px;
   box-shadow:
-    inset 2px 3px 7px rgba(0, 0, 0, 0.14),
-    inset -1px -1px 4px rgba(255, 255, 255, 0.9);
+    inset 4px 4px 8px rgba(152, 182, 208, 0.45),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.92);
 }
-
-/* ── Webkit thumb ─────────────────────────────────────────────────────────── */
 
 .slider-glassy::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -187,62 +249,37 @@
   border-radius: 50%;
   border: none;
   cursor: grab;
-  /* Glass sphere: sharp specular at top-left → lavender-blue body → deep navy */
-  background: radial-gradient(
-    circle at 32% 26%,
-    rgba(255, 255, 255, 1)    0%,
-    rgba(255, 255, 255, 0.7)  14%,
-    rgba(139, 148, 255, 0.9)  42%,
-    #2563eb                   68%,
-    #004ac6                   100%
-  );
-  /* Layer 1 — tight white ring (glass edge)
-     Layer 2 — indigo color halo
-     Layer 3 — diffuse ambient glow
-     Layer 4 — grounded drop shadow */
+  background: #f0f7fd;
   box-shadow:
-    0 0 0 2.5px rgba(255, 255, 255, 0.96),
-    0 0 0 5.5px rgba(99, 102, 241, 0.22),
-    0 0 22px  rgba(99, 102, 241, 0.45),
-    0 4px 16px rgba(0, 74, 198, 0.45);
+    5px 5px 12px rgba(152, 182, 208, 0.48),
+    -4px -4px 9px rgba(255, 255, 255, 0.98);
   transition:
-    transform  0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.22s ease;
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
 }
 
-/* hover: spring scale-up + expanded purple glow */
 .slider-glassy:hover::-webkit-slider-thumb {
-  transform: scale(1.25);
+  transform: scale(1.22);
   cursor: grab;
   box-shadow:
-    0 0 0 2.5px rgba(255, 255, 255, 0.96),
-    0 0 0 7px   rgba(99, 102, 241, 0.3),
-    0 0 34px    rgba(99, 102, 241, 0.6),
-    0 6px 22px  rgba(0, 74, 198, 0.5);
+    7px 7px 16px rgba(152, 182, 208, 0.54),
+    -5px -5px 11px rgba(255, 255, 255, 1);
 }
 
-/* active/drag: press-in feel + pulsed outer ring */
 .slider-glassy:active::-webkit-slider-thumb {
-  transform: scale(1.08);
+  transform: scale(0.96);
   cursor: grabbing;
   box-shadow:
-    0 0 0 2.5px rgba(255, 255, 255, 0.92),
-    0 0 0 11px  rgba(99, 102, 241, 0.18),
-    0 0 28px    rgba(99, 102, 241, 0.45),
-    0 2px 10px  rgba(0, 74, 198, 0.5);
+    inset 3px 3px 6px rgba(152, 182, 208, 0.45),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.92);
 }
 
-/* keyboard focus: clear accessible ring */
 .slider-glassy:focus-visible::-webkit-slider-thumb {
   box-shadow:
-    0 0 0 2.5px rgba(255, 255, 255, 0.96),
-    0 0 0 5.5px rgba(99, 102, 241, 0.4),
-    0 0 0 8px   rgba(99, 102, 241, 0.12),
-    0 0 28px    rgba(99, 102, 241, 0.5),
-    0 4px 16px  rgba(0, 74, 198, 0.45);
+    5px 5px 12px rgba(152, 182, 208, 0.48),
+    -4px -4px 9px rgba(255, 255, 255, 0.98),
+    0 0 0 3px rgba(37, 99, 235, 0.3);
 }
-
-/* ── Firefox thumb ────────────────────────────────────────────────────────── */
 
 .slider-glassy::-moz-range-thumb {
   width: 28px;
@@ -250,17 +287,8 @@
   border-radius: 50%;
   border: none;
   cursor: grab;
-  background: radial-gradient(
-    circle at 32% 26%,
-    rgba(255, 255, 255, 1)    0%,
-    rgba(255, 255, 255, 0.7)  14%,
-    rgba(139, 148, 255, 0.9)  42%,
-    #2563eb                   68%,
-    #004ac6                   100%
-  );
+  background: #f0f7fd;
   box-shadow:
-    0 0 0 2.5px rgba(255, 255, 255, 0.96),
-    0 0 0 5.5px rgba(99, 102, 241, 0.22),
-    0 0 22px    rgba(99, 102, 241, 0.45),
-    0 4px 16px  rgba(0, 74, 198, 0.45);
+    5px 5px 12px rgba(152, 182, 208, 0.48),
+    -4px -4px 9px rgba(255, 255, 255, 0.98);
 }

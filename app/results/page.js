@@ -134,7 +134,7 @@ export default async function ResultsPage({ searchParams }) {
       <Header activePage="analysis" />
 
       {/* Summary bar */}
-      <div className="bg-white/40 backdrop-blur-sm border-b border-outline-variant/50 sticky top-20 z-40">
+      <div className="sticky top-20 z-40" style={{ background: 'rgba(234,242,249,0.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderBottom: '1px solid rgba(255,255,255,0.6)' }}>
         <div className="max-w-[1280px] mx-auto px-margin py-4 flex flex-wrap items-center justify-between gap-md">
           <div className="flex flex-wrap items-center gap-3">
             {[
@@ -144,7 +144,7 @@ export default async function ResultsPage({ searchParams }) {
             ].map(({ icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-xl shadow-sm border border-outline-variant/30"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl neuro-btn"
               >
                 <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
                 <span className="font-label-caps text-[11px] text-on-surface font-semibold tracking-wide">
@@ -200,7 +200,7 @@ export default async function ResultsPage({ searchParams }) {
           return (
             <article
               key={vehicle.id}
-              className="card-glass rounded-[2rem] shadow-[0px_20px_50px_rgba(0,0,0,0.08)] border border-white overflow-hidden relative group transition-all hover:shadow-[0px_30px_60px_rgba(0,0,0,0.12)]"
+              className="card-glass rounded-[2rem] overflow-hidden relative group transition-all"
             >
               {/* Match score */}
               <div className="absolute top-6 right-8 flex flex-col items-center z-10">
@@ -303,7 +303,7 @@ export default async function ResultsPage({ searchParams }) {
                         return (
                           <div
                             key={stat.label}
-                            className={`${h.bg} p-4 rounded-2xl shadow-sm border ${h.border}`}
+                            className={`${h.bg} p-4 rounded-2xl neuro-btn`}
                           >
                             <p className={`font-label-caps text-[10px] ${h.label} uppercase tracking-wider mb-1 font-bold`}>
                               {stat.label}
@@ -325,7 +325,7 @@ export default async function ResultsPage({ searchParams }) {
                             <span className="text-body-sm font-medium text-on-surface-variant col-span-2">
                               {bar.label}
                             </span>
-                            <div className="col-span-3 h-3 bg-surface-container rounded-full overflow-hidden p-[2px]">
+                            <div className="col-span-3 h-3 rounded-full overflow-hidden p-[2px]" style={{ boxShadow: 'inset 3px 3px 7px rgba(152,182,208,0.42), inset -2px -2px 5px rgba(255,255,255,0.95)' }}>
                               <div
                                 className={`h-full bg-gradient-to-r ${bar.colorClass} rounded-full transition-all duration-1000 ${bar.glow ? 'progress-glow' : ''}`}
                                 style={{ width: `${bar.width}%` }}
@@ -340,7 +340,7 @@ export default async function ResultsPage({ searchParams }) {
 
                 {/* Safety features */}
                 {vehicle.safety_features?.length > 0 && (
-                  <div className="mt-12 p-8 bg-white/60 rounded-[1.5rem] border border-white shadow-inner">
+                  <div className="mt-12 p-8 rounded-[1.5rem]" style={{ background: 'rgba(221,234,245,0.5)', boxShadow: 'inset 4px 4px 8px rgba(152,182,208,0.38), inset -2px -2px 6px rgba(255,255,255,0.92)' }}>
                     <div className="flex items-center gap-2 mb-6">
                       <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
                       <h4 className="font-title-sm text-on-surface tracking-tight">Safety Features</h4>
@@ -398,7 +398,8 @@ export default async function ResultsPage({ searchParams }) {
           <div className="flex flex-col items-center gap-6 pt-12">
             <a
               href="/"
-              className="bg-on-surface text-white px-10 py-5 rounded-2xl font-headline-md text-[18px] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
+              className="bg-primary text-on-primary px-10 py-5 rounded-2xl font-headline-md text-[18px] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3"
+              style={{ boxShadow: '5px 5px 16px rgba(0,74,198,0.38), -3px -3px 8px rgba(255,255,255,0.7)' }}
             >
               <span className="material-symbols-outlined">tune</span>
               Refine Selection Criteria
