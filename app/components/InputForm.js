@@ -46,6 +46,9 @@ export default function InputForm() {
   const [interestRate, setInterestRate] = useState('')
   const [loanTerm, setLoanTerm] = useState('60')
   const [showFinancing, setShowFinancing] = useState(false)
+  const [showUsed, setShowUsed] = useState(false)
+  const [yearMin, setYearMin] = useState(2015)
+  const [yearMax, setYearMax] = useState(2026)
   const [errors, setErrors] = useState({})
 
   function setSlider(key, val) {
@@ -53,9 +56,12 @@ export default function InputForm() {
   }
 
   function handleSubmit() {
+    const rawBudget = budget.replace(/,/g, '')
+    const rawMiles  = milesPerYear.replace(/,/g, '')
+
     const newErrors = {}
-    if (!budget)        newErrors.budget        = 'Please enter your maximum budget'
-    if (!milesPerYear)  newErrors.milesPerYear  = 'Please enter your annual mileage'
+    if (!rawBudget)     newErrors.budget        = 'Please enter your maximum budget'
+    if (!rawMiles)      newErrors.milesPerYear  = 'Please enter your annual mileage'
     if (!ownershipYears) newErrors.ownershipYears = 'Please enter how long you plan to keep the car'
     if (!fuelPrice)     newErrors.fuelPrice     = 'Please enter your local fuel price'
 
@@ -68,8 +74,8 @@ export default function InputForm() {
 
     setErrors({})
     const payload = {
-      budget,
-      miles: milesPerYear,
+      budget: rawBudget,
+      miles: rawMiles,
       years: ownershipYears,
       fuel_price: fuelPrice,
       seats: minSeats,
@@ -82,6 +88,7 @@ export default function InputForm() {
       loan_term: loanTerm,
       ...(downPayment && { down_payment: downPayment }),
       ...(interestRate && { interest_rate: interestRate }),
+      ...(showUsed && { year_min: String(yearMin), year_max: String(yearMax) }),
     }
 
     fetch('/api/searches', {
@@ -128,11 +135,13 @@ export default function InputForm() {
                 </label>
                 <input
                   id="budget"
-                  type="number"
-                  min="0"
-                  placeholder="e.g. 45000"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 45,000"
                   value={budget}
-                  onChange={e => { setBudget(e.target.value); setErrors(prev => ({ ...prev, budget: null })) }}
+                  onFocus={() => setBudget(budget.replace(/,/g, ''))}
+                  onBlur={() => { const n = parseInt(budget.replace(/,/g, ''), 10); if (!isNaN(n)) setBudget(n.toLocaleString()) }}
+                  onChange={e => { setBudget(e.target.value.replace(/[^0-9]/g, '')); setErrors(prev => ({ ...prev, budget: null })) }}
                   className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.budget ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.budget
@@ -147,11 +156,13 @@ export default function InputForm() {
                 </label>
                 <input
                   id="milesPerYear"
-                  type="number"
-                  min="0"
-                  placeholder="e.g. 12000"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 12,000"
                   value={milesPerYear}
-                  onChange={e => { setMilesPerYear(e.target.value); setErrors(prev => ({ ...prev, milesPerYear: null })) }}
+                  onFocus={() => setMilesPerYear(milesPerYear.replace(/,/g, ''))}
+                  onBlur={() => { const n = parseInt(milesPerYear.replace(/,/g, ''), 10); if (!isNaN(n)) setMilesPerYear(n.toLocaleString()) }}
+                  onChange={e => { setMilesPerYear(e.target.value.replace(/[^0-9]/g, '')); setErrors(prev => ({ ...prev, milesPerYear: null })) }}
                   className={`w-full rounded-xl px-md py-3 font-body-md transition-all ${errors.milesPerYear ? 'neuro-input-error' : 'neuro-input'}`}
                 />
                 {errors.milesPerYear
@@ -412,6 +423,77 @@ export default function InputForm() {
                   <p className="font-body-sm text-[11px] text-on-surface-variant/60 ml-1">
                     Longer terms lower monthly payments but increase total interest paid
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Include Used Options Toggle */}
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowUsed(prev => !prev)}
+              className="w-full flex justify-between items-center p-lg transition-colors"
+            >
+              <div className="flex items-center gap-md">
+                <span className="material-symbols-outlined text-secondary text-xl">history</span>
+                <div className="text-left">
+                  <p className="font-title-sm text-title-sm text-on-surface font-semibold">Include Used Options</p>
+                  <p className="font-body-sm text-[11px] text-on-surface-variant/60 mt-0.5">Browse pre-owned vehicles within a model year range</p>
+                </div>
+              </div>
+              <div
+                aria-checked={showUsed}
+                role="switch"
+                className="relative flex-shrink-0 rounded-full transition-all duration-300"
+                style={{
+                  width: 48, height: 28,
+                  background: showUsed ? 'linear-gradient(145deg, #2c6ef7, #1d56e0)' : '#ddeaf5',
+                  boxShadow: showUsed
+                    ? '4px 4px 10px rgba(0,74,198,0.38), -2px -2px 6px rgba(255,255,255,0.45)'
+                    : 'inset 3px 3px 7px rgba(152,182,208,0.44), inset -2px -2px 5px rgba(255,255,255,0.96)',
+                }}
+              >
+                <span
+                  className="absolute rounded-full bg-white transition-all duration-300"
+                  style={{
+                    width: 20, height: 20, top: 4, left: showUsed ? 24 : 4,
+                    boxShadow: showUsed
+                      ? '3px 3px 8px rgba(0,74,198,0.28), -2px -2px 5px rgba(255,255,255,0.7)'
+                      : '3px 3px 8px rgba(152,182,208,0.4), -2px -2px 5px rgba(255,255,255,0.98)',
+                  }}
+                />
+              </div>
+            </button>
+
+            <div
+              className="transition-all duration-300 ease-in-out overflow-hidden"
+              style={{ maxHeight: showUsed ? '160px' : '0px', opacity: showUsed ? 1 : 0 }}
+            >
+              <div className="px-lg pb-lg grid grid-cols-2 gap-lg">
+                <div className="flex flex-col gap-xs">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">FROM YEAR</label>
+                  <input
+                    type="number"
+                    min="1990"
+                    max={yearMax}
+                    placeholder="e.g. 2015"
+                    value={yearMin}
+                    onChange={e => setYearMin(Math.min(parseInt(e.target.value) || 1990, yearMax))}
+                    className="w-full rounded-xl px-md py-sm font-body-sm neuro-input"
+                  />
+                </div>
+                <div className="flex flex-col gap-xs">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant ml-1">TO YEAR</label>
+                  <input
+                    type="number"
+                    min={yearMin}
+                    max="2026"
+                    placeholder="e.g. 2026"
+                    value={yearMax}
+                    onChange={e => setYearMax(Math.max(parseInt(e.target.value) || 2026, yearMin))}
+                    className="w-full rounded-xl px-md py-sm font-body-sm neuro-input"
+                  />
                 </div>
               </div>
             </div>

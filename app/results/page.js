@@ -1,5 +1,6 @@
 import Header from '@/app/components/Header'
 import Footer from '@/app/components/Footer'
+import VehicleList from '@/app/components/VehicleList'
 import { createClient } from '@/lib/supabase'
 import { scoreAndRank } from '@/lib/scoring'
 import { generateInsightsWithAI, generateInsightFallback } from '@/lib/insights'
@@ -25,9 +26,10 @@ async function fetchVehicles(params) {
   if (params.seats && params.seats !== '8+') {
     query = query.gte('seating_capacity', parseInt(params.seats))
   }
+  if (params.year_min) query = query.gte('year', parseInt(params.year_min))
+  if (params.year_max) query = query.lte('year', parseInt(params.year_max))
 
-  // Fetch a wider pool so the scoring engine has enough candidates to rank meaningfully
-  const { data, error } = await query.limit(50)
+  const { data, error } = await query.limit(80)
 
   if (error) throw error
   return data || []
@@ -88,17 +90,10 @@ const LEARN_MORE = [
 // ─── Rank config ──────────────────────────────────────────────────────────────
 
 const RANKS = [
-  { badge: 'Top Pick', badgeClass: 'rank-badge-gold' },
-  { badge: 'Runner Up', badgeClass: 'rank-badge-silver' },
+  { badge: 'Top Pick',     badgeClass: 'rank-badge-gold' },
+  { badge: 'Runner Up',    badgeClass: 'rank-badge-silver' },
   { badge: 'Also Consider', badgeClass: 'bg-outline text-white' },
 ]
-
-const HIGHLIGHT = {
-  primary: { bg: 'bg-primary/5', border: 'border-primary/10', text: 'text-primary', label: 'text-primary' },
-  secondary: { bg: 'bg-secondary/5', border: 'border-secondary/10', text: 'text-secondary', label: 'text-secondary' },
-  tertiary: { bg: 'bg-tertiary/5', border: 'border-tertiary/10', text: 'text-tertiary', label: 'text-tertiary' },
-  null: { bg: 'bg-white', border: 'border-outline-variant/20', text: 'text-on-surface', label: 'text-outline' },
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -111,7 +106,7 @@ export default async function ResultsPage({ searchParams }) {
 
   try {
     const pool = await fetchVehicles(params)
-    vehicles = scoreAndRank(pool, params).slice(0, 5)
+    vehicles = scoreAndRank(pool, params).slice(0, 15)
   } catch (err) {
     console.error('[/results]', err.message)
     setupRequired = true
@@ -190,177 +185,19 @@ export default async function ResultsPage({ searchParams }) {
         )}
 
         {/* Vehicle cards */}
-        {vehicles.map((vehicle, index) => {
-          const rank      = RANKS[index] || RANKS[2]
-          const stats     = toStats(vehicle)
-          const breakdown = toBreakdown(vehicle)
-          const tags      = toTags(vehicle)
-          const insight   = aiInsights?.[index] ?? generateInsightFallback(vehicle, params, index, vehicles)
-
-          return (
-            <article
-              key={vehicle.id}
-              className="card-glass rounded-[2rem] overflow-hidden relative group transition-all"
-            >
-              {/* Match score */}
-              <div className="absolute top-6 right-8 flex flex-col items-center z-10">
-                <div className="w-[72px] h-[72px] rounded-full bg-primary/5 border-2 border-primary/20 flex flex-col items-center justify-center shadow-sm">
-                  <span className="font-extrabold text-[22px] leading-none text-primary">
-                    {vehicle._matchScore}
-                  </span>
-                  <span className="font-label-caps text-[9px] text-primary/70 tracking-widest mt-0.5">
-                    MATCH
-                  </span>
-                </div>
-              </div>
-
-              {/* Rank badge */}
-              <div
-                className={`absolute top-0 left-0 ${rank.badgeClass} font-bold px-8 py-4 rounded-br-[2rem] shadow-xl z-10 flex items-center gap-2`}
-              >
-                <span
-                  className="material-symbols-outlined text-white"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  workspace_premium
-                </span>
-                <span className="font-headline-md text-[18px] text-white tracking-tight">
-                  {rank.badge}
-                </span>
-              </div>
-
-              <div className="p-10 pt-24">
-                <div className="flex flex-col lg:flex-row gap-12">
-
-                  {/* Image placeholder + title */}
-                  <div className="w-full lg:w-[40%] space-y-6">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-surface-container-low to-surface-container-high rounded-[1.5rem] overflow-hidden shadow-inner border border-outline-variant/20 flex items-center justify-center">
-                      <span
-                        className="material-symbols-outlined text-outline-variant text-[80px]"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        directions_car
-                      </span>
-                    </div>
-                    <div>
-                      <h2 className="font-display-lg text-[32px] text-on-surface leading-tight font-extrabold">
-                        {vehicle.year} {vehicle.make} {vehicle.model}{' '}
-                        {vehicle.trim && (
-                          <span className="text-secondary font-normal text-[24px]">{vehicle.trim}</span>
-                        )}
-                      </h2>
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        {tags.map(tag => (
-                          <span
-                            key={tag}
-                            className="bg-white px-3 py-1.5 rounded-lg border border-outline-variant/30 font-label-caps text-[10px] uppercase text-on-surface-variant font-bold"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Insight block */}
-                    <div className="space-y-3">
-                      {insight.costSummary && (
-                        <p className="font-body-sm text-[13px] text-on-surface leading-relaxed">
-                          {insight.costSummary}
-                          {insight.contextLine && (
-                            <span className="text-on-surface-variant"> {insight.contextLine}</span>
-                          )}
-                        </p>
-                      )}
-                      {insight.rankReason && (
-                        <div className="flex gap-2 items-start">
-                          <span className="material-symbols-outlined text-[16px] mt-0.5 flex-shrink-0 text-primary">
-                            {index === 0 ? 'emoji_events' : 'info'}
-                          </span>
-                          <p className="font-body-sm text-[13px] text-on-surface-variant leading-relaxed">
-                            {insight.rankReason}
-                          </p>
-                        </div>
-                      )}
-                      {insight.noiseNote && (
-                        <div className="flex gap-2 items-start opacity-70">
-                          <span className="material-symbols-outlined text-secondary text-[14px] mt-0.5 flex-shrink-0">
-                            remove_circle
-                          </span>
-                          <p className="font-body-sm text-[12px] text-on-surface-variant italic leading-relaxed">
-                            {insight.noiseNote}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                  </div>
-
-                  {/* Stats + breakdown */}
-                  <div className="w-full lg:w-[60%] flex flex-col gap-10">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {stats.map(stat => {
-                        const h = HIGHLIGHT[stat.highlight] ?? HIGHLIGHT.null
-                        return (
-                          <div
-                            key={stat.label}
-                            className={`${h.bg} p-4 rounded-2xl neuro-btn`}
-                          >
-                            <p className={`font-label-caps text-[10px] ${h.label} uppercase tracking-wider mb-1 font-bold`}>
-                              {stat.label}
-                            </p>
-                            <p className={`font-headline-md text-[20px] ${h.text}`}>{stat.value}</p>
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    <div className="space-y-6">
-                      <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-[0.15em] font-extrabold flex items-center gap-2">
-                        <span className="w-8 h-[1px] bg-outline-variant" />
-                        Score Breakdown
-                      </h3>
-                      <div className="grid gap-y-4">
-                        {breakdown.map(bar => (
-                          <div key={bar.label} className="grid grid-cols-5 gap-4 items-center">
-                            <span className="text-body-sm font-medium text-on-surface-variant col-span-2">
-                              {bar.label}
-                            </span>
-                            <div className="col-span-3 h-3 rounded-full overflow-hidden p-[2px]" style={{ boxShadow: 'inset 3px 3px 7px rgba(152,182,208,0.42), inset -2px -2px 5px rgba(255,255,255,0.95)' }}>
-                              <div
-                                className={`h-full bg-gradient-to-r ${bar.colorClass} rounded-full transition-all duration-1000 ${bar.glow ? 'progress-glow' : ''}`}
-                                style={{ width: `${bar.width}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Safety features */}
-                {vehicle.safety_features?.length > 0 && (
-                  <div className="mt-12 p-8 rounded-[1.5rem]" style={{ background: 'rgba(221,234,245,0.5)', boxShadow: 'inset 4px 4px 8px rgba(152,182,208,0.38), inset -2px -2px 6px rgba(255,255,255,0.92)' }}>
-                    <div className="flex items-center gap-2 mb-6">
-                      <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
-                      <h4 className="font-title-sm text-on-surface tracking-tight">Safety Features</h4>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {vehicle.safety_features.map(feature => (
-                        <span
-                          key={feature}
-                          className="bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/20 font-body-sm text-on-surface-variant"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </article>
-          )
-        })}
+        {vehicles.length > 0 && (
+          <VehicleList
+            items={vehicles.map((vehicle, index) => ({
+              vehicle,
+              originalIndex: index,
+              rank: index < 3 ? RANKS[index] : null,
+              stats: toStats(vehicle),
+              breakdown: toBreakdown(vehicle),
+              tags: toTags(vehicle),
+              insight: aiInsights?.[index] ?? generateInsightFallback(vehicle, params, index, vehicles),
+            }))}
+          />
+        )}
 
         {/* Learn more / methodology */}
         {!setupRequired && vehicles.length > 0 && (
